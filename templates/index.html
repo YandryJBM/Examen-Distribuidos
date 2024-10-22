@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Transaccional</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        h2 {
+            color: #444;
+            margin-top: 30px;
+            margin-bottom: 10px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+
+        input, select {
+            padding: 10px;
+            margin-bottom: 15px;
+            width: calc(100% - 22px); /* Full width with padding adjustment */
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* Ensures padding doesn't increase the element's width */
+        }
+
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        #transferencia {
+            display: none; /* Esconder inicialmente */
+        }
+
+        /* Estilo para el div de transferencia */
+        .transferencia-label {
+            margin-top: 20px;
+        }
+
+        /* Estilo para mostrar mensajes */
+        .mensaje {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .exito {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+
+        /* Media Queries para Responsividad */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+
+            input, select {
+                width: 100%; /* Asegura que se use todo el ancho en pantallas pequeñas */
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Sistema Transaccional</h1>
+    <div class="container">
+        <form id="transaccionForm" action="/transaccion" method="POST" onsubmit="return manejarTransaccion(event)">
+            <label for="cedula">Cédula:</label>
+            <input type="text" id="cedula" name="cedula" required>
+            
+            <label for="monto">Monto:</label>
+            <input type="text" id="monto" name="monto" required>
+            
+            <label for="tipo">Tipo de Transacción:</label>
+            <select id="tipo" name="tipo" onchange="mostrarTransferencia()">
+                <option value="DEPOSITAR">Depósito</option>
+                <option value="RETIRAR">Retiro</option>
+                <option value="TRANSFERIR">Transferencia</option>
+            </select>
+            
+            <div id="transferencia" class="transferencia-label">
+                <label for="cedula_destino">Cédula del Destinatario (solo para transferencia):</label>
+                <input type="text" id="cedula_destino" name="cedula_destino" placeholder="Ingrese cédula destino">
+            </div>
+
+            <input type="submit" value="Realizar Transacción">
+        </form>
+
+        <h2>Consulta de Cliente</h2>
+        <form id="consultaForm" action="/consulta" method="POST" onsubmit="return manejarConsulta(event)">
+            <label for="cedula_consulta">Cédula:</label>
+            <input type="text" id="cedula_consulta" name="cedula_consulta" required>
+            <input type="submit" value="Consultar Cliente">
+        </form>
+
+        <!-- Div para mostrar mensajes -->
+        <div id="mensaje" class="mensaje"></div>  
+    </div>
+
+    <script>
+        function mostrarTransferencia() {
+            const tipo = document.getElementById('tipo').value;
+            const transferenciaDiv = document.getElementById('transferencia');
+            transferenciaDiv.style.display = (tipo === 'TRANSFERIR') ? 'block' : 'none';
+        }
+
+        function manejarTransaccion(event) {
+            event.preventDefault(); // Prevenir el envío del formulario
+
+            const formData = new FormData(event.target);
+            fetch('/transaccion', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('mensaje').innerHTML = `<div class="exito">${data}</div>`;
+            })
+            .catch(error => {
+                document.getElementById('mensaje').innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            });
+
+            event.target.reset(); // Reiniciar el formulario
+        }
+
+        function manejarConsulta(event) {
+            event.preventDefault(); // Prevenir el envío del formulario
+
+            const formData = new FormData(event.target);
+            fetch('/consulta', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('mensaje').innerHTML = `<div class="exito">${data}</div>`;
+            })
+            .catch(error => {
+                document.getElementById('mensaje').innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            });
+
+            event.target.reset(); // Reiniciar el formulario
+        }
+    </script>
+</body>
+</html>
